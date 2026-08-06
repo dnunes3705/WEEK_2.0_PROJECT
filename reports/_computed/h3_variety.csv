@@ -1,0 +1,9 @@
+metric,stat,group,value
+restaurant_variety,mean,False,1.0
+restaurant_variety,mean,True,1.5649038461538463
+restaurant_variety,median,False,1.0
+restaurant_variety,median,True,1.0
+cuisine_variety,mean,False,1.0
+cuisine_variety,mean,True,1.4110576923076923
+cuisine_variety,median,False,1.0
+cuisine_variety,median,True,1.0

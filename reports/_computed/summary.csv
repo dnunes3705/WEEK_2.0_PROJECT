@@ -1,0 +1,2 @@
+n_orders,n_customers,n_restaurants,n_cuisines,weekend_order_share,rated_order_share,avg_rating_rated_orders,repeat_customer_share,avg_orders_per_customer
+1898,1200,178,14,0.7118018967334035,0.6122233930453108,4.344234079173838,0.3466666666666667,1.5816666666666668

@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FoodHub Analysis Report</title>
+    <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --card: #0b1b33;
+      --border: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --muted2: rgba(255,255,255,.55);
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --warn: #f59e0b;
+      --shadow: 0 10px 24px rgba(0,0,0,.35);
+      --radius: 14px;
+      --maxw: 1120px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(56,189,248,.18), transparent 60%),
+        radial-gradient(900px 600px at 90% 0%, rgba(34,197,94,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg), #070b14);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 28px 18px 72px; }
+    .hero {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15,23,42,.88), rgba(11,27,51,.55));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 22px 18px;
+    }
+    .hero h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: .2px; }
+    .hero p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .chip {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .card {
+      grid-column: span 3;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,.72);
+      border-radius: var(--radius);
+      padding: 14px 14px 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.22);
+    }
+    .kpi-label { color: var(--muted2); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    .kpi-value { font-size: 22px; margin-top: 6px; }
+    .kpi-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    section { margin-top: 22px; }
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .panel {
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,.55);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+    }
+    .p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .subsec { margin: 0 0 16px; }
+    .subsec-title {
+      margin: 0 0 8px;
+      font-size: 15px;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.92);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .kpi-card {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      border-radius: 12px;
+      padding: 12px 12px 10px;
+    }
+    .kpi-card-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(255,255,255,.86);
+      margin-bottom: 6px;
+    }
+    .kpi-card-body {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .cols { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+    .note {
+      border-left: 3px solid var(--warn);
+      background: rgba(245,158,11,.08);
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .imgcard {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      border-radius: var(--radius);
+      padding: 10px;
+      overflow: hidden;
+    }
+    .imgcard img { width: 100%; display: block; border-radius: 10px; background: white; }
+    .imgcap { color: var(--muted); font-size: 12px; margin-top: 8px; }
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .three {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+    .spacer { height: 14px; }
+    ul { margin: 10px 0 0 18px; color: var(--muted); line-height: 1.55; }
+    code { font-family: var(--mono); font-size: 0.95em; color: rgba(255,255,255,.86); }
+    pre {
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      color: rgba(255,255,255,.86);
+      line-height: 1.45;
+    }
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+    }
+    .tbl th, .tbl td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+      color: rgba(255,255,255,.88);
+      vertical-align: top;
+    }
+    .tbl th {
+      text-align: left;
+      font-size: 12px;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      background: rgba(255,255,255,.03);
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .footer {
+      margin-top: 28px;
+      color: var(--muted2);
+      font-size: 12px;
+      text-align: center;
+    }
+    @media (max-width: 980px) {
+      .card { grid-column: span 6; }
+      .cols { grid-template-columns: 1fr; }
+      .two { grid-template-columns: 1fr; }
+      .three { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>FoodHub Analysis Report</h1>
+      <p>A consolidated report covering the problem statement, data overview, exploratory analysis, proxy hypothesis testing, key insights, and recommendations.</p>
+      <div class="chips">
+        <div class="chip">Source: data/raw/foodhub_order.csv</div>
+        <div class="chip">Processed: data/processed/*_features(.new).csv</div>
+        <div class="chip">Generated by: <code>python src/build_html_report.py</code></div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="kpi-label">Orders</div>
+          <div class="kpi-value">1,898</div>
+          <div class="kpi-sub">Delivered orders in dataset</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Customers</div>
+          <div class="kpi-value">1,200</div>
+          <div class="kpi-sub">Unique customers observed</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Weekend Share</div>
+          <div class="kpi-value">71.2%</div>
+          <div class="kpi-sub">Orders labeled Weekend</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Rated Orders</div>
+          <div class="kpi-value">61.2%</div>
+          <div class="kpi-sub">Rating present (not 'Not given')</div>
+        </div>
+      </div>
+    </div>
+
+    <section>
+      <h2 class="section-title">Problem Statement</h2>
+      <div class="panel">
+        <div class="subsec">
+<h3 class="subsec-title">Business Context</h3>
+<p class="p">New York City has a rapidly growing number of restaurants, and many students and busy professionals depend on restaurant food due to limited time to cook. Online food delivery helps customers access meals from their preferred restaurants through a single app. FoodHub is a food-aggregator platform that connects customers and restaurants, assigns delivery partners to confirmed orders, tracks pickup and drop-off, collects customer ratings, and earns revenue by charging restaurants a fixed margin per delivered order.</p>
+</div>
+<div class="subsec">
+<h3 class="subsec-title">Project Objective</h3>
+<p class="p">FoodHub has stored historical order data for registered customers in its online portal. The objective is to analyze this order data to understand demand patterns across restaurants and customer segments, so the business can improve the customer experience and make better operational and partner (restaurant) decisions.</p>
+</div>
+<div class="subsec">
+<h3 class="subsec-title">Key Performance Indicators (KPIs)</h3>
+<div class="kpi-grid">
+<div class="kpi-card">
+<div class="kpi-card-title">KPI 1: Customer Retention Rate</div>
+<div class="kpi-card-body">Definition: Percentage of customers who remain active (place at least one order) in a subsequent time period.
+Why it matters: Indicates whether FoodHub is successfully keeping customers engaged over time.</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-card-title">KPI 2: Repeat Order Rate</div>
+<div class="kpi-card-body">Definition: Percentage of customers who place more than one order within a defined time window.
+Why it matters: Captures repeat behavior and helps distinguish one-time users from loyal customers.</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-card-title">KPI 3: Average Order Frequency</div>
+<div class="kpi-card-body">Definition: Average number of orders per customer per defined time window (e.g., per month).
+Why it matters: Measures depth of engagement and helps estimate customer lifetime value potential.</div>
+</div>
+</div>
+</div>
+<div class="subsec">
+<h3 class="subsec-title">Key Hypotheses</h3>
+<div class="kpi-grid">
+<div class="kpi-card">
+<div class="kpi-card-title">Hypothesis 1: Faster and more consistent delivery experiences lead to higher customer retention.</div>
+<div class="kpi-card-body">Rationale: Long or highly variable delivery times reduce satisfaction and discourage repeat usage.</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-card-title">Hypothesis 2: Higher customer ratings are associated with higher repeat ordering.</div>
+<div class="kpi-card-body">Rationale: Ratings proxy overall experience quality; satisfied customers are more likely to return.</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-card-title">Hypothesis 3: Customers who order from a wider variety of restaurants/cuisines are more likely to be retained.</div>
+<div class="kpi-card-body">Rationale: Broader usage increases reliance on FoodHub as a primary channel for meals.</div>
+</div>
+</div>
+</div>
+        <div class="note" style="margin-top:12px;">
+          <strong>Key limitation</strong><br/>
+          This dataset has no <code>order_datetime</code>. Retention and time-window KPIs cannot be computed as defined, so analyses use within-dataset engagement proxies such as <code>repeat_customer_flag</code> and <code>n_orders</code>.
+        </div>
+
+        <div style="margin-top:14px;">
+          <h3 class="subsec-title" style="margin-bottom:10px;">Key Stats (Quick Facts)</h3>
+          <div class="grid" style="margin-top:0;">
+            <div class="card">
+              <div class="kpi-label">Prep Time (min)</div>
+              <div class="kpi-value">27.37</div>
+              <div class="kpi-sub">Avg (min=20, max=35)</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">Mean Delivery Time</div>
+              <div class="kpi-value">24.16</div>
+              <div class="kpi-sub">Minutes (order-level)</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">Orders &gt; $20</div>
+              <div class="kpi-value">29.2%</div>
+              <div class="kpi-sub">Share of all orders</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">Weekend Orders</div>
+              <div class="kpi-value">71.2%</div>
+              <div class="kpi-sub">Share of all orders</div>
+            </div>
+          </div>
+
+          <div class="two" style="margin-top:14px;">
+            <div class="imgcard">
+              <div class="imgcap" style="margin-top:0;margin-bottom:8px;"><strong>Top 5 restaurants</strong> (by # of orders)</div>
+              <table class="tbl">
+<thead><tr><th>restaurant_name</th><th>n_orders</th></tr></thead>
+<tbody>
+<tr><td>Shake Shack</td><td>219</td></tr>
+<tr><td>The Meatball Shop</td><td>132</td></tr>
+<tr><td>Blue Ribbon Sushi</td><td>119</td></tr>
+<tr><td>Blue Ribbon Fried Chicken</td><td>96</td></tr>
+<tr><td>Parm</td><td>68</td></tr>
+</tbody></table>
+            </div>
+            <div class="imgcard">
+              <div class="imgcap" style="margin-top:0;margin-bottom:8px;"><strong>Most popular cuisines on weekends</strong> (top 5)</div>
+              <table class="tbl">
+<thead><tr><th>cuisine_type</th><th>weekend_orders</th></tr></thead>
+<tbody>
+<tr><td>American</td><td>415</td></tr>
+<tr><td>Japanese</td><td>335</td></tr>
+<tr><td>Italian</td><td>207</td></tr>
+<tr><td>Chinese</td><td>163</td></tr>
+<tr><td>Mexican</td><td>53</td></tr>
+</tbody></table>
+            </div>
+          </div>
+
+          <div class="imgcard" style="margin-top:14px;">
+            <div class="imgcap" style="margin-top:0;margin-bottom:8px;"><strong>Delivery time: weekdays vs weekends</strong></div>
+            <table class="tbl">
+<thead><tr><th>day_of_the_week</th><th>n_orders</th><th>mean_delivery_time</th><th>median_delivery_time</th></tr></thead>
+<tbody>
+<tr><td>Weekday</td><td>547</td><td>28.34</td><td>28.0</td></tr>
+<tr><td>Weekend</td><td>1351</td><td>22.47</td><td>22.0</td></tr>
+</tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Data Overview</h2>
+      <div class="panel">
+        <div class="three">
+          <div class="imgcard">
+            <img src="assets/orders_by_day.png" alt="Orders by day of the week" />
+            <div class="imgcap">Orders are heavily weekend-weighted.</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/orders_by_rating.png" alt="Orders by rating" />
+            <div class="imgcap">A large share of orders have no rating (“Not given”).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/cuisine_counts.png" alt="Cuisine counts" />
+            <div class="imgcap">Cuisine types ranked by number of orders.</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/cost_distribution.png" alt="Cost distribution" />
+            <div class="imgcap">Order cost distribution (USD).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/cost_boxplot.png" alt="Cost boxplot" />
+            <div class="imgcap">Cost distribution summary (median, IQR, outliers).</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/cost_by_cuisine.png" alt="Cost of the order by cuisine type" />
+            <div class="imgcap">Cost of the order by cuisine type (boxplot).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/prep_time_distribution.png" alt="Food preparation time distribution" />
+            <div class="imgcap">Food preparation time distribution (minutes).</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/prep_time_boxplot.png" alt="Food preparation time boxplot" />
+            <div class="imgcap">Food preparation time summary (median, IQR, outliers).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/prep_time_by_cuisine.png" alt="Food preparation time by cuisine type" />
+            <div class="imgcap">Food preparation time by cuisine type (boxplot).</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/total_time_distribution.png" alt="Total fulfillment time distribution" />
+            <div class="imgcap">Prep+delivery time distribution (minutes).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/delivery_time_by_day_boxplot.png" alt="Delivery time by day of the week (boxplot)" />
+            <div class="imgcap">Delivery time by day_of_the_week (boxplot).</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/delivery_time_distribution.png" alt="Delivery time distribution" />
+            <div class="imgcap">Delivery time histogram (minutes).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/corr_heatmap_cost_prep_delivery.png" alt="Correlation heatmap" />
+            <div class="imgcap">Heatmap of correlations among cost, prep time, and delivery time.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Hypothetical Promotions & Revenue</h2>
+      <div class="panel cols">
+        <div>
+          <h3 class="subsec-title">Promotion-eligible restaurants (Q13)</h3>
+          <p class="p">Eligibility rule: <code>rating_count &gt; 50</code> and <code>avg_rating &gt; 4</code> (ratings exclude <code>Not given</code>).</p>
+          <table class="tbl">
+<thead><tr><th>restaurant_name</th><th>rating_count</th><th>avg_rating</th></tr></thead>
+<tbody>
+<tr><td>The Meatball Shop</td><td>84</td><td>4.512</td></tr>
+<tr><td>Blue Ribbon Fried Chicken</td><td>64</td><td>4.328</td></tr>
+<tr><td>Shake Shack</td><td>133</td><td>4.278</td></tr>
+<tr><td>Blue Ribbon Sushi</td><td>73</td><td>4.219</td></tr>
+</tbody></table>
+        </div>
+        <div class="note">
+          <strong>Net revenue estimate (Q14)</strong><br/>
+          <div style="margin-top:8px; color: var(--muted); line-height:1.55;">
+            Fee rule applied per order:
+            <ul style="margin-top:6px;">
+              <li>25% of <code>cost_of_the_order</code> if cost &gt; $20</li>
+              <li>15% of <code>cost_of_the_order</code> if cost &gt; $5 (and ≤ $20)</li>
+              <li>0% otherwise</li>
+            </ul>
+            <div style="margin-top:10px;">
+              <span class="kpi-label">Net revenue (all orders)</span><br/>
+              <span style="font-size:22px; font-weight:600; color: rgba(255,255,255,.92);">$6,166.30</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Engagement & Customer Segments (Proxy)</h2>
+      <div class="panel two">
+        <div class="imgcard">
+          <img src="assets/repeat_share.png" alt="Repeat share" />
+          <div class="imgcap">Repeat customers are those with <code>n_orders >= 2</code> in the dataset snapshot.</div>
+        </div>
+        <div class="imgcard">
+          <img src="assets/delivery_vs_orders.png" alt="Delivery time vs orders" />
+          <div class="imgcap">Relationship between delivery speed and observed order count (jittered).</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Hypothesis-Driven Visual Analysis</h2>
+      <div class="panel">
+        <h3 style="margin:0 0 10px;">H1: Delivery experience → repeat behavior (proxy)</h3>
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/avg_delivery_by_repeat.png" alt="Avg delivery time by repeat flag" />
+            <div class="imgcap">Repeat vs non-repeat customers by average delivery time.</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/avg_total_by_repeat.png" alt="Avg total fulfillment time by repeat flag" />
+            <div class="imgcap">Repeat vs non-repeat customers by total fulfillment time.</div>
+          </div>
+        </div>
+        <div class="imgcard" style="margin-top:14px;">
+          <img src="assets/repeat_heatmap_delivery_cost.png" alt="Heatmap repeat rate by delivery and cost quartiles" />
+          <div class="imgcap">Repeat share across delivery-time quartiles and customer spend quartiles (descriptive).</div>
+        </div>
+
+        <h3 style="margin:18px 0 10px;">H2: Ratings → repeat behavior (proxy)</h3>
+        <div class="two">
+          <div class="imgcard">
+            <img src="assets/avg_rating_by_repeat.png" alt="Avg rating by repeat flag" />
+            <div class="imgcap">Ratings are shown only for customers with at least one rated order.</div>
+          </div>
+          <div class="note">
+            <strong>Interpretation caveat</strong><br/>
+            Many customers have only one rated order, which can create extreme values (e.g., <code>pct_top_rating=1.0</code>) without indicating a stable long-run tendency.
+          </div>
+        </div>
+        <div class="two" style="margin-top:14px;">
+          <div class="imgcard">
+            <img src="assets/point_rating_delivery_time.png" alt="Point plot rating vs delivery time" />
+            <div class="imgcap">Point plot: rating vs delivery time (order-level).</div>
+          </div>
+          <div class="imgcard">
+            <img src="assets/point_rating_prep_time.png" alt="Point plot rating vs food preparation time" />
+            <div class="imgcap">Point plot: rating vs food preparation time (order-level).</div>
+          </div>
+        </div>
+        <div class="imgcard" style="margin-top:14px;">
+          <img src="assets/point_rating_cost.png" alt="Point plot rating vs cost of the order" />
+          <div class="imgcap">Point plot: rating vs cost of the order (order-level).</div>
+        </div>
+
+        <h3 style="margin:18px 0 10px;">H3: Variety → engagement (proxy)</h3>
+        <div class="note">
+          Variety measures (e.g., <code>cuisine_variety</code>) naturally grow with <code>n_orders</code>. With no timestamps, “variety → retention” is best treated as descriptive and should avoid leakage in future time-based analyses.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Proxy Hypothesis Testing Results (SciPy/Statsmodels)</h2>
+      <div class="panel">
+        <p style="margin:0 0 12px;color:var(--muted);line-height:1.6;">
+          These results use proxy outcomes because the dataset lacks timestamps. Use them as directional evidence, not definitive retention measurement.
+        </p>
+        <h3 style="margin:0 0 8px;">H1 summary</h3>
+        <table class="tbl">
+<thead><tr><th>Metric</th><th>n_repeat</th><th>n_nonrepeat</th><th>mean_repeat</th><th>mean_nonrepeat</th><th>diff_mean</th><th>p_MWU</th><th>p_t(Welch)</th><th>cliff_d</th><th>cohen_d</th></tr></thead>
+<tbody>
+<tr><td>`avg_delivery_time`</td><td>416</td><td>784</td><td>23.929</td><td>24.356</td><td>-0.427</td><td>0.011</td><td>0.080</td><td>-0.089</td><td>-0.095</td></tr>
+<tr><td>`avg_total_fulfillment_time`</td><td>416</td><td>784</td><td>51.137</td><td>51.934</td><td>-0.796</td><td>0.016</td><td>0.017</td><td>-0.084</td><td>-0.129</td></tr>
+<tr><td>`avg_prep_time`</td><td>416</td><td>784</td><td>27.208</td><td>27.578</td><td>-0.369</td><td>0.144</td><td>0.096</td><td>-0.051</td><td>-0.089</td></tr>
+</tbody></table>
+        <div style="margin-top:12px;"></div>
+        <table class="tbl">
+<thead><tr><th>Predictor</th><th>OR</th><th>OR 95% CI</th><th>p</th></tr></thead>
+<tbody>
+<tr><td>`avg_delivery_time`</td><td>0.988</td><td>[0.957, 1.020]</td><td>0.452</td></tr>
+<tr><td>`avg_prep_time`</td><td>0.979</td><td>[0.951, 1.008]</td><td>0.149</td></tr>
+<tr><td>`avg_cost`</td><td>0.995</td><td>[0.978, 1.014]</td><td>0.626</td></tr>
+<tr><td>`weekend_share`</td><td>1.194</td><td>[0.840, 1.698]</td><td>0.322</td></tr>
+</tbody></table>
+
+        <h3 style="margin:18px 0 8px;">H2 summary</h3>
+        <table class="tbl">
+<thead><tr><th>Metric</th><th>n_repeat</th><th>n_nonrepeat</th><th>mean_repeat</th><th>mean_nonrepeat</th><th>diff_mean</th><th>p_MWU</th><th>p_t(Welch)</th><th>cliff_d</th><th>cohen_d</th></tr></thead>
+<tbody>
+<tr><td>`avg_rating`</td><td>372</td><td>487</td><td>4.360</td><td>4.351</td><td>0.009</td><td>0.432</td><td>0.852</td><td>-0.029</td><td>0.013</td></tr>
+<tr><td>`pct_high_rating`</td><td>372</td><td>487</td><td>0.837</td><td>0.846</td><td>-0.009</td><td>0.003</td><td>0.687</td><td>-0.082</td><td>-0.027</td></tr>
+<tr><td>`pct_top_rating`</td><td>372</td><td>487</td><td>0.523</td><td>0.505</td><td>0.018</td><td>0.713</td><td>0.568</td><td>0.013</td><td>0.038</td></tr>
+</tbody></table>
+        <div style="margin-top:12px;"></div>
+        <table class="tbl">
+<thead><tr><th>Predictor</th><th>OR</th><th>OR 95% CI</th><th>p</th></tr></thead>
+<tbody>
+<tr><td>`avg_rating`</td><td>0.832</td><td>[0.533, 1.300]</td><td>0.419</td></tr>
+<tr><td>`pct_top_rating`</td><td>1.383</td><td>[0.715, 2.676]</td><td>0.335</td></tr>
+<tr><td>`avg_delivery_time`</td><td>0.985</td><td>[0.948, 1.023]</td><td>0.428</td></tr>
+<tr><td>`avg_cost`</td><td>0.991</td><td>[0.970, 1.012]</td><td>0.408</td></tr>
+<tr><td>`weekend_share`</td><td>1.305</td><td>[0.862, 1.976]</td><td>0.208</td></tr>
+</tbody></table>
+
+        <h3 style="margin:18px 0 8px;">H3 summary</h3>
+        <table class="tbl">
+<thead><tr><th>Predictor</th><th>RR</th><th>RR 95% CI</th><th>p</th></tr></thead>
+<tbody>
+<tr><td>`restaurant_variety`</td><td>1.667</td><td>[1.524, 1.823]</td><td>0.000</td></tr>
+<tr><td>`cuisine_variety`</td><td>0.903</td><td>[0.810, 1.006]</td><td>0.065</td></tr>
+<tr><td>`avg_cost`</td><td>0.999</td><td>[0.992, 1.006]</td><td>0.786</td></tr>
+<tr><td>`avg_delivery_time`</td><td>1.001</td><td>[0.989, 1.014]</td><td>0.817</td></tr>
+<tr><td>`weekend_share`</td><td>1.059</td><td>[0.923, 1.215]</td><td>0.417</td></tr>
+</tbody></table>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Key Insights</h2>
+      <div class="panel">
+        <ul>
+          <li><strong>Weekend-heavy demand:</strong> ~71% of orders occur on weekends, suggesting staffing and partner capacity decisions should prioritize weekend performance.</li>
+          <li><strong>Ratings are incomplete:</strong> ~39% of orders are unrated (“Not given”), so rating-based insights are conditional on customers choosing to rate.</li>
+          <li><strong>Delivery time signal is subtle:</strong> repeat customers show slightly lower average fulfillment times, but simple models show limited explanatory power without richer context (distance, location, timestamps).</li>
+          <li><strong>Variety relates strongly to order count:</strong> variety measures are mechanically linked to order volume; time-based windows are needed to test causality cleanly.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Recommendations</h2>
+      <div class="panel cols">
+        <div>
+          <h3 style="margin:0 0 8px;">Operational</h3>
+          <ul>
+            <li>Target the slowest deliveries first: identify restaurants/cuisines with long delivery tails and reduce variance (dispatch, batching rules, partner SLAs).</li>
+            <li>Plan for weekend load: staffing and courier supply should reflect the strong weekend skew.</li>
+          </ul>
+          <h3 style="margin:14px 0 8px;">Product / Measurement</h3>
+          <ul>
+            <li>Increase rating capture (without bias): prompt at consistent points post-delivery and monitor rating-response rates by segment.</li>
+            <li>Add timestamps (<code>order_datetime</code>) and a clear retention window definition so KPI1–KPI3 can be measured as stated.</li>
+          </ul>
+        </div>
+        <div class="note">
+          <strong>Data to request next</strong><br/>
+          <ul style="margin-top:8px;">
+            <li><code>order_datetime</code> (or at least <code>order_date</code>)</li>
+            <li>Pickup/dropoff timestamps (or delivery pipeline events)</li>
+            <li>Delivery distance / zone (borough)</li>
+            <li>Courier identifier and batch indicators</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Generated locally. Output: <code>reports/foodhub_report.html</code>
+    </div>
+  </div>
+</body>
+</html>

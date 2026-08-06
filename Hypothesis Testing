@@ -1,0 +1,113 @@
+# Hypothesis Testing (Plan Only — No Tests Run Yet)
+
+Source hypotheses: `problem_definition.txt`.
+
+Important limitation (current dataset): there is **no order timestamp/date**, so “retention in a subsequent time period” and “repeat within a defined time window” cannot be measured as written. Below, each hypothesis includes:
+- **Preferred test (as-written)** if timestamps become available, and
+- **Proxy test (with current data)** using within-dataset engagement measures (e.g., `repeat_customer_flag`, `n_orders`).
+
+Processed data inputs (use `*.new.csv` if present; those are created when the original CSVs are locked by Excel):
+- Order-level: `data/processed/orders_features(.new).csv`
+- Customer-level: `data/processed/customer_features(.new).csv`
+- Restaurant-level: `data/processed/restaurant_features(.new).csv`
+- Cuisine-level: `data/processed/cuisine_features(.new).csv`
+
+------------------------------------------------------------------------------
+## Hypothesis 1 (H1)
+### “Faster and more consistent delivery experiences lead to higher customer retention.”
+
+### 1) Statistical test to be performed
+Preferred (as-written, requires timestamps):
+- **Customer retention model**: logistic regression (retained vs not in next period) or survival analysis (time-to-churn) with delivery experience predictors.
+
+Proxy (with current data, no timestamps):
+- **Primary**: logistic regression with outcome `repeat_customer_flag` and predictors delivery speed/consistency.
+- **Robustness (nonparametric)**: Mann–Whitney U test comparing delivery experience metrics between repeat vs non-repeat customers (effect sizes reported).
+
+### 2) Subset of data required
+Proxy (current):
+- Use `data/processed/customer_features(.new).csv`.
+- For consistency metrics (`delivery_time_cv`, `std_delivery_time`, `total_time_cv`): subset to customers with `n_orders >= 2` (or `has_2plus_orders==True` if present).
+
+Preferred (as-written):
+- Requires adding at least `order_datetime` (or `order_date`) to define periods and “subsequent time period” retention.
+
+### 3) Other necessary details (assumptions, metrics, etc.)
+Key predictors (customer-level):
+- Speed: `avg_delivery_time`, `avg_total_fulfillment_time`
+- Consistency: `delivery_time_cv` (and/or `std_delivery_time`), `total_time_cv`
+
+Controls / covariates (to reduce confounding in the proxy model):
+- `avg_cost`, `weekend_share`/`weekday_share`, `restaurant_variety`, `cuisine_variety`, `rated_share`
+
+Assumptions / cautions:
+- Customer-level rows treat customers as independent.
+- Consistency features are undefined for `n_orders==1` (structural missingness).
+- Without timestamps, proxy “repeat” is not time-ordered and cannot distinguish true retention from sampling.
+
+------------------------------------------------------------------------------
+## Hypothesis 2 (H2)
+### “Higher customer ratings are associated with higher repeat ordering.”
+
+### 1) Statistical test to be performed
+Proxy (current data):
+- **Primary**: logistic regression with outcome `repeat_customer_flag` and predictors rating proxies.
+- **Robustness**:
+  - Mann–Whitney U test of `avg_rating` between repeat vs non-repeat customers (rated customers only).
+  - Spearman correlation between `avg_rating` and `n_orders` (rated customers only).
+
+Preferred (as-written, if timestamps exist):
+- Model “repeat within X days” (binary) using logistic regression, with experience ratings as predictors and a defined window.
+
+### 2) Subset of data required
+Proxy (current):
+- Use `data/processed/customer_features(.new).csv`.
+- Subset to customers with at least one rated order: `has_rated_orders==True` (or `rated_share > 0`).
+- Optional (recommended for stability): require **≥2 rated orders** (not currently stored as a column; would be computed from order-level data) to reduce single-rated-order artifacts.
+
+### 3) Other necessary details (assumptions, metrics, etc.)
+Rating predictors:
+- `avg_rating` (mean rating across rated orders)
+- `pct_top_rating` (share of rated orders rated 5)
+- `pct_high_rating` (share of rated orders rated 4–5)
+
+Notes on rating missingness:
+- Many orders have `rating == "Not given"`. Rating nonresponse can be systematic, so analyses are conditional on “rated” behavior.
+- Rating scale in this dataset is limited (3–5 only), which can compress variation.
+
+------------------------------------------------------------------------------
+## Hypothesis 3 (H3)
+### “Customers who order from a wider variety of restaurants/cuisines are more likely to be retained.”
+
+### 1) Statistical test to be performed
+Preferred (as-written, requires timestamps):
+- Logistic regression / survival analysis with **retention** as the outcome and variety metrics as predictors (possibly with cohort controls).
+
+Proxy (with current data, no timestamps):
+- **Not recommended as a strict ‘repeat_customer_flag vs variety’ test** because variety is mechanically linked to number of orders (e.g., `cuisine_variety >= 2` implies at least 2 orders).
+- If you still want an exploratory proxy model, use a **count model**:
+  - Poisson or negative binomial regression with outcome `n_orders` and predictors `restaurant_variety`, `cuisine_variety`, and controls.
+
+### 2) Subset of data required
+Proxy (current):
+- Use `data/processed/customer_features(.new).csv` for `restaurant_variety`, `cuisine_variety`, `n_orders`.
+
+Preferred (as-written):
+- Requires adding `order_datetime` (or `order_date`) to define retention windows and to measure variety **before** the retention outcome window (avoid leakage).
+
+### 3) Other necessary details (assumptions, metrics, etc.)
+Key caution (leakage/tautology risk):
+- Variety counts are bounded by and increase with `n_orders`, so “variety → repeat” can be partly definitional.
+
+Mitigations (if we proceed later):
+- Define variety in an “early window” (e.g., first 30 days) and retention in a later window (requires timestamps).
+- Engineer normalized variety measures (e.g., `cuisine_variety / n_orders`, diversity/entropy) to reduce mechanical dependence.
+
+------------------------------------------------------------------------------
+## Deliverables Once You Approve
+- A small analysis script/notebook section per hypothesis that:
+  - builds the exact analysis dataset subset,
+  - runs the specified tests/models (as approved),
+  - reports effect sizes + confidence intervals (where applicable),
+  - includes sensitivity checks for rating missingness and `n_orders` thresholds.
+

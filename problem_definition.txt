@@ -1,0 +1,31 @@
+FoodHub – Problem Definition
+
+1. Business Context
+New York City has a rapidly growing number of restaurants, and many students and busy professionals depend on restaurant food due to limited time to cook. Online food delivery helps customers access meals from their preferred restaurants through a single app. FoodHub is a food-aggregator platform that connects customers and restaurants, assigns delivery partners to confirmed orders, tracks pickup and drop-off, collects customer ratings, and earns revenue by charging restaurants a fixed margin per delivered order.
+
+2. Project Objective
+FoodHub has stored historical order data for registered customers in its online portal. The objective is to analyze this order data to understand demand patterns across restaurants and customer segments, so the business can improve the customer experience and make better operational and partner (restaurant) decisions.
+
+3. Key Performance Indicators (KPIs)
+KPI 1: Customer Retention Rate
+Definition: Percentage of customers who remain active (place at least one order) in a subsequent time period.
+Why it matters: Indicates whether FoodHub is successfully keeping customers engaged over time.
+
+KPI 2: Repeat Order Rate
+Definition: Percentage of customers who place more than one order within a defined time window.
+Why it matters: Captures repeat behavior and helps distinguish one-time users from loyal customers.
+
+KPI 3: Average Order Frequency
+Definition: Average number of orders per customer per defined time window (e.g., per month).
+Why it matters: Measures depth of engagement and helps estimate customer lifetime value potential.
+
+4. Key Hypotheses
+Hypothesis 1: Faster and more consistent delivery experiences lead to higher customer retention.
+Rationale: Long or highly variable delivery times reduce satisfaction and discourage repeat usage.
+
+Hypothesis 2: Higher customer ratings are associated with higher repeat ordering.
+Rationale: Ratings proxy overall experience quality; satisfied customers are more likely to return.
+
+Hypothesis 3: Customers who order from a wider variety of restaurants/cuisines are more likely to be retained.
+Rationale: Broader usage increases reliance on FoodHub as a primary channel for meals.
+

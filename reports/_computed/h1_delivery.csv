@@ -1,0 +1,13 @@
+metric,stat,group,value
+avg_delivery_time,mean,non_repeat,24.355867346938776
+avg_delivery_time,mean,repeat,23.929060416079647
+avg_delivery_time,median,non_repeat,25.0
+avg_delivery_time,median,repeat,24.208333333333336
+avg_total_fulfillment_time,mean,non_repeat,51.933673469387756
+avg_total_fulfillment_time,mean,repeat,51.13739991312107
+avg_total_fulfillment_time,median,non_repeat,52.0
+avg_total_fulfillment_time,median,repeat,51.47222222222222
+avg_prep_time,mean,non_repeat,27.57780612244898
+avg_prep_time,mean,repeat,27.20833949704142
+avg_prep_time,median,non_repeat,28.0
+avg_prep_time,median,repeat,27.17142857142857

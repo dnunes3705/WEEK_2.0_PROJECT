@@ -1,0 +1,5 @@
+,food_preparation_time,delivery_time,total_fulfillment_time_min
+mean,27.371970495258168,24.161749209694417,51.53371970495258
+50%,27.0,25.0,52.0
+min,20.0,15.0,35.0
+max,35.0,33.0,68.0
