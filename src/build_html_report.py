@@ -169,6 +169,7 @@ class SummaryStats:
     weekend_order_share: float
     rated_order_share: float
     avg_rating_rated_orders: float
+    avg_total_fulfillment_time_min: float
     repeat_customer_share: float
     avg_orders_per_customer: float
 
@@ -183,6 +184,7 @@ def compute_summary(orders: pd.DataFrame, customers: pd.DataFrame, restaurants: 
         weekend_order_share=float(orders["is_weekend"].mean()),
         rated_order_share=float(orders["rated_flag"].mean()),
         avg_rating_rated_orders=float(rated_orders["rating_num"].mean()),
+        avg_total_fulfillment_time_min=float(orders["total_fulfillment_time_min"].mean()),
         repeat_customer_share=float(customers["repeat_customer_flag"].mean()),
         avg_orders_per_customer=float(customers["n_orders"].mean()),
     )
@@ -283,6 +285,10 @@ def main() -> int:
             customers[col] = customers[col].astype(bool)
 
     summary = compute_summary(orders, customers, restaurants, cuisines)
+
+    rated_customers = customers.loc[customers["avg_rating"].notna()].copy()
+    avg_rating_repeat = float(rated_customers.loc[rated_customers["repeat_customer_flag"] == True, "avg_rating"].mean())
+    avg_rating_nonrepeat = float(rated_customers.loc[rated_customers["repeat_customer_flag"] == False, "avg_rating"].mean())
 
     # -----------------------------
     # Key stats requested for report
@@ -705,6 +711,11 @@ def main() -> int:
       padding: 14px 14px 12px;
       box-shadow: 0 8px 18px rgba(0,0,0,.22);
     }}
+    .key-stats-grid {{
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-top: 0;
+    }}
+    .key-stats-grid .card {{ grid-column: auto; }}
     .kpi-label {{ color: var(--muted2); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }}
     .kpi-value {{ font-size: 22px; margin-top: 6px; }}
     .kpi-sub {{ color: var(--muted); font-size: 12px; margin-top: 4px; }}
@@ -832,6 +843,10 @@ def main() -> int:
       .two {{ grid-template-columns: 1fr; }}
       .three {{ grid-template-columns: 1fr; }}
       .kpi-grid {{ grid-template-columns: 1fr; }}
+      .key-stats-grid {{ grid-template-columns: 1fr 1fr; }}
+    }}
+    @media (max-width: 560px) {{
+      .key-stats-grid {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
@@ -880,7 +895,7 @@ def main() -> int:
 
         <div style="margin-top:14px;">
           <h3 class="subsec-title" style="margin-bottom:10px;">Key Stats (Quick Facts)</h3>
-          <div class="grid" style="margin-top:0;">
+          <div class="grid key-stats-grid">
             <div class="card">
               <div class="kpi-label">Prep Time (min)</div>
               <div class="kpi-value">{prep_mean:.2f}</div>
@@ -890,6 +905,11 @@ def main() -> int:
               <div class="kpi-label">Mean Delivery Time</div>
               <div class="kpi-value">{mean_delivery_time:.2f}</div>
               <div class="kpi-sub">Minutes (order-level)</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">Mean Fulfillment Time</div>
+              <div class="kpi-value">{summary.avg_total_fulfillment_time_min:.2f}</div>
+              <div class="kpi-sub">Minutes (prep + delivery)</div>
             </div>
             <div class="card">
               <div class="kpi-label">Orders &gt; $20</div>
@@ -1126,6 +1146,8 @@ def main() -> int:
         <ul>
           <li><strong>Weekend-heavy demand:</strong> ~{summary.weekend_order_share:.0%} of orders occur on weekends, suggesting staffing and partner capacity decisions should prioritize weekend performance.</li>
           <li><strong>Ratings are incomplete:</strong> ~{(1-summary.rated_order_share):.0%} of orders are unrated (“Not given”), so rating-based insights are conditional on customers choosing to rate.</li>
+          <li><strong>Ratings vs repeat (proxy):</strong> among customers who rated, average customer rating is ~{avg_rating_repeat:.2f} (repeat) vs ~{avg_rating_nonrepeat:.2f} (non-repeat), suggesting little separation in this dataset.</li>
+          <li><strong>Typical end-to-end fulfillment:</strong> ~{summary.avg_total_fulfillment_time_min:.0f} minutes on average from prep start to delivery (prep + delivery).</li>
           <li><strong>Delivery time signal is subtle:</strong> repeat customers show slightly lower average fulfillment times, but simple models show limited explanatory power without richer context (distance, location, timestamps).</li>
           <li><strong>Variety relates strongly to order count:</strong> variety measures are mechanically linked to order volume; time-based windows are needed to test causality cleanly.</li>
         </ul>
@@ -1145,6 +1167,7 @@ def main() -> int:
           <ul>
             <li>Increase rating capture (without bias): prompt at consistent points post-delivery and monitor rating-response rates by segment.</li>
             <li>Add timestamps (<code>order_datetime</code>) and a clear retention window definition so KPI1–KPI3 can be measured as stated.</li>
+            <li>Request additional operational data (pickup/dropoff timestamps, delivery distance/zone, courier &amp; batching indicators) to better diagnose delays and drivers of repeat usage.</li>
           </ul>
         </div>
         <div class="note">
